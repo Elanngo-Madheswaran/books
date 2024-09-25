@@ -33,6 +33,7 @@
     "luxon": "^2.5.2",
     "node-fetch": "2",
     "pesa": "^1.1.12",
+    "puppeteer-core": "^23.3.0",
     "source-map-support": "^0.5.21",
     "vue": "^3.2.40",
     "vue-router": "^4.0.12"
@@ -50,6 +51,7 @@
     "@types/luxon": "^2.3.1",
     "@types/node": "^17.0.23",
     "@types/node-fetch": "^2.6.1",
+    "@types/puppeteer-core": "^5.4.0",
     "@types/tape": "^4.13.2",
     "@typescript-eslint/eslint-plugin": "5.60.0",
     "@typescript-eslint/parser": "5.60.0",
@@ -60,6 +62,7 @@
     "electron": "22.3.27",
     "electron-builder": "^24.9.1",
     "electron-devtools-installer": "^3.2.0",
+    "electron-rebuild": "^3.2.9",
     "electron-updater": "^6.1.7",
     "eslint": "^8.43.0",
     "eslint-config-prettier": "^8.3.0",

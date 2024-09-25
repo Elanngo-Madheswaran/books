@@ -73,7 +73,8 @@ export default function registerIpcMainActionListeners(main: Main) {
       return await dialog.showSaveDialog(main.mainWindow!, options);
     }
   );
-
+  
+  
   ipcMain.handle(
     IPC_ACTIONS.GET_DIALOG_RESPONSE,
     async (_, options: MessageBoxOptions) => {

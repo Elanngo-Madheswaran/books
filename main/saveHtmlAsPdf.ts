@@ -1,6 +1,10 @@
-import { App, BrowserWindow } from 'electron';
+import { App } from 'electron';
 import fs from 'fs/promises';
 import path from 'path';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const execPromise = promisify(exec);
 
 export async function saveHtmlAsPdf(
   html: string,
@@ -9,43 +13,43 @@ export async function saveHtmlAsPdf(
   width: number, // centimeters
   height: number // centimeters
 ): Promise<boolean> {
-  /**
-   * Store received html as a file in a tempdir,
-   * this will be loaded into the print view
-   */
-  const tempRoot = app.getPath('temp');
-  const filename = path.parse(savePath).name;
-  const htmlPath = path.join(tempRoot, `${filename}.html`);
-  await fs.writeFile(htmlPath, html, { encoding: 'utf-8' });
+  try {
+    // Store HTML as a file in a temp directory
+    const tempRoot = app.getPath('temp');
+    const filename = path.parse(savePath).name;
+    const htmlPath = path.join(tempRoot, `${filename}.html`);
+    await fs.writeFile(htmlPath, html, { encoding: 'utf-8' });
 
-  const printWindow = await getInitializedPrintWindow(htmlPath, width, height);
-  const printOptions = {
-    margins: { top: 0, bottom: 0, left: 0, right: 0 }, // equivalent to previous 'marginType: 1'
-    pageSize: {
-      height: height / 2.54, // Convert from centimeters to inches
-      width: width / 2.54, // Convert from centimeters to inches
-    },
-    printBackground: true,
-  };
+    // Path to Edge executable
+    const edgePath = `C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe`;
 
-  const data = await printWindow.webContents.printToPDF(printOptions);
-  await fs.writeFile(savePath, data);
-  printWindow.close();
-  await fs.unlink(htmlPath);
-  return true;
-}
+    // Command to open Edge with the print preview for the HTML file
+    const command = `"${edgePath}" --print --no-margins "${htmlPath}"`;
 
-async function getInitializedPrintWindow(
-  printFilePath: string,
-  width: number,
-  height: number
-) {
-  const printWindow = new BrowserWindow({
-    width: Math.floor(width * 28.333333), // pixels
-    height: Math.floor(height * 28.333333), // pixels
-    show: false,
-  });
+    // Execute the command to open Edge
+    await execPromise(command);
 
-  await printWindow.loadFile(printFilePath);
-  return printWindow;
+    // Clean up the temporary HTML file
+    // Use a timeout to ensure Edge has enough time to open before deleting the file
+    setTimeout(async () => {
+      try {
+        await fs.unlink(htmlPath);
+      } catch (error) {
+        if (error instanceof Error) {
+          console.error(`Failed to delete temp HTML file: ${error.message}`);
+        } else {
+          console.error('Failed to delete temp HTML file: Unknown error');
+        }
+      }
+    }, 5000); // 5 seconds delay to ensure Edge has time to process
+
+    return true;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(`Failed to save HTML as PDF: ${error.message}`);
+    } else {
+      console.error('Failed to save HTML as PDF: Unknown error');
+    }
+    return false;
+  }
 }
